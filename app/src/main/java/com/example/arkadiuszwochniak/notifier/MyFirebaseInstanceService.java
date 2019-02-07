@@ -3,11 +3,18 @@ package com.example.arkadiuszwochniak.notifier;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -17,8 +24,7 @@ import java.util.Map;
 import java.util.Random;
 
 public class MyFirebaseInstanceService extends FirebaseMessagingService {
-
-    TextView textView;
+    Button button;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -26,8 +32,8 @@ public class MyFirebaseInstanceService extends FirebaseMessagingService {
 
         String title = remoteMessage.getNotification().getTitle();
         String body = remoteMessage.getNotification().getBody();
-
         showNotification(title,body);
+        
 
     }
 
@@ -61,6 +67,7 @@ public class MyFirebaseInstanceService extends FirebaseMessagingService {
         notificationManager.notify(new Random().nextInt(),notifiactionBuilder.build());
 
     }
+
 
     @Override
     public void onNewToken(String s) {

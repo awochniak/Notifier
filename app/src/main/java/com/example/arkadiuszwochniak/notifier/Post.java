@@ -1,7 +1,8 @@
 package com.example.arkadiuszwochniak.notifier;
 
 public class Post {
-    private String title, status;
+    private String title;
+    private Boolean status;
 
     public String getTitle() {
         return title;
@@ -11,15 +12,15 @@ public class Post {
         this.title = title;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 
-    public Post(String title, String status) {
+    public Post(String title, Boolean status) {
         this.title = title;
         this.status = status;
     }

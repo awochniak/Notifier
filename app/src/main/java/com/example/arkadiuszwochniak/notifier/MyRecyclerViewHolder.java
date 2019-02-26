@@ -16,6 +16,5 @@ public class MyRecyclerViewHolder extends RecyclerView.ViewHolder {
         name = itemView.findViewById(R.id.name);
         status = itemView.findViewById(R.id.control);
         imageView = itemView.findViewById(R.id.imageView);
-        imageView.setImageResource(android.R.drawable.presence_online);
     }
 }

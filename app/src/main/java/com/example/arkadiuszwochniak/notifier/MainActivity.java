@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -32,23 +33,22 @@ import com.google.firebase.iid.InstanceIdResult;
 import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
-    EditText editText;
-    Button button;
     RecyclerView recyclerView;
     ImageView imageView;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     FirebaseRecyclerOptions<Post> options;
     FirebaseRecyclerAdapter<Post, MyRecyclerViewHolder> adapter;
+    Boolean code;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        editText = findViewById(R.id.editText);
-        button = findViewById(R.id.btnPost);
+
         recyclerView = findViewById(R.id.recycler_view);
+        imageView = findViewById(R.id.imageView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference("kontrolki");
@@ -56,20 +56,15 @@ public class MainActivity extends AppCompatActivity {
         String title = getIntent().getStringExtra("title");
         String body = getIntent().getStringExtra("body");
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                postData();
-            }
-        });
-        
+
         displayContent();
-        
-        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( new OnSuccessListener<InstanceIdResult>() {
+
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
                 String deviceToken = instanceIdResult.getToken();
-                
+                Log.e("token urządzenia: ", deviceToken);
+
             }
         });
     }
@@ -78,21 +73,30 @@ public class MainActivity extends AppCompatActivity {
 
         options =
                 new FirebaseRecyclerOptions.Builder<Post>()
-                .setQuery(databaseReference,Post.class)
-                .build();
+                        .setQuery(databaseReference, Post.class)
+                        .build();
 
         adapter = new FirebaseRecyclerAdapter<Post, MyRecyclerViewHolder>(options) {
             @Override
             protected void onBindViewHolder(@NonNull MyRecyclerViewHolder holder, int position, @NonNull Post model) {
                 holder.name.setText(model.getTitle());
-                holder.status.setText(model.getStatus());
+                holder.status.setText(model.getStatus().toString());
+
+                code = model.getStatus();
+
+                if (code == true) {
+                    holder.imageView.setImageResource(android.R.drawable.presence_online);
+                } else {
+                    holder.imageView.setImageResource(android.R.drawable.presence_offline);
+                }
+
 
             }
 
             @NonNull
             @Override
             public MyRecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-                View itemView = LayoutInflater.from(getBaseContext()).inflate(R.layout.control_view,viewGroup,false);
+                View itemView = LayoutInflater.from(getBaseContext()).inflate(R.layout.control_view, viewGroup, false);
                 return new MyRecyclerViewHolder(itemView);
             }
         };
@@ -103,12 +107,4 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void postData() {
-        String title = editText.getText().toString();
-        Post post = new Post(title,title);
-        databaseReference.push()
-                .setValue(post);
-
-        adapter.notifyDataSetChanged();
-    }
 }

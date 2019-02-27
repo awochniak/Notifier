@@ -2,6 +2,7 @@ package com.example.arkadiuszwochniak.notifier;
 
 public class Post {
     private String title;
+    
     private Boolean status;
 
     public String getTitle() {

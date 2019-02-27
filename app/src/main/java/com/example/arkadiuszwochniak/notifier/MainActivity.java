@@ -73,11 +73,12 @@ public class MainActivity extends AppCompatActivity {
                 ArrayList<String> names= new ArrayList<>();
                 for(DataSnapshot ds : dataSnapshot.getChildren()){
                     status = ds.child("status").getValue(Boolean.class);
-
                     if(status == false){
-                        String name = ds.child("title").getValue(String.class);
+                        String title = ds.child("title").getValue(String.class);
+                        String message = ds.child("message").getValue(String.class);
+                        message = message.replace("\\n","\n");
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                        builder.setMessage(name)
+                        builder.setMessage(message)
                                 .setCancelable(false)
                                 .setNegativeButton("Zamknij", new DialogInterface.OnClickListener() {
                                     @Override
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 });
                         AlertDialog alert = builder.create();
-                        alert.setTitle(name);
+                        alert.setTitle(title);
                         alert.show();
                     }
 

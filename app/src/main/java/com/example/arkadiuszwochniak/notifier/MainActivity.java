@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView imageView;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
+    TextView textView;
     FirebaseRecyclerOptions<Post> options;
     FirebaseRecyclerAdapter<Post, MyRecyclerViewHolder> adapter;
     Boolean code;
@@ -55,9 +56,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         recyclerView = findViewById(R.id.recycler_view);
-        imageView = findViewById(R.id.imageView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference("kontrolki");
@@ -122,14 +121,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected void onBindViewHolder(@NonNull MyRecyclerViewHolder holder, int position, @NonNull Post model) {
                 holder.name.setText(model.getTitle());
-                holder.status.setText(model.getStatus().toString());
-
                 code = model.getStatus();
 
                 if (code == true) {
                     holder.imageView.setImageResource(android.R.drawable.presence_online);
                 } else {
-                    holder.imageView.setImageResource(android.R.drawable.presence_offline);
+                    holder.imageView.setImageResource(android.R.drawable.presence_busy);
                 }
 
 

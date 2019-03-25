@@ -45,11 +45,12 @@ public class MainActivity extends AppCompatActivity {
     ImageView imageView;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
-    TextView textView;
     FirebaseRecyclerOptions<Post> options;
     FirebaseRecyclerAdapter<Post, MyRecyclerViewHolder> adapter;
     Boolean code;
     Boolean status;
+    Intent intent;
+    String deviceToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,49 +66,18 @@ public class MainActivity extends AppCompatActivity {
         String body = getIntent().getStringExtra("body");
 
 
-        displayContent();
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArrayList<String> names= new ArrayList<>();
-                for(DataSnapshot ds : dataSnapshot.getChildren()){
-                    status = ds.child("status").getValue(Boolean.class);
-                    if(status == false){
-                        String title = ds.child("title").getValue(String.class);
-                        String message = ds.child("message").getValue(String.class);
-                        message = message.replace("\\n","\n");
-                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                        builder.setMessage(message)
-                                .setCancelable(false)
-                                .setNegativeButton("Zamknij", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.cancel();
-                                    }
-                                });
-                        AlertDialog alert = builder.create();
-                        alert.setTitle(title);
-                        alert.show();
-                    }
-
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
 
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
-                String deviceToken = instanceIdResult.getToken();
+                deviceToken = instanceIdResult.getToken();
                 Log.e("token urządzenia: ", deviceToken);
+                checkToken(deviceToken);
 
             }
         });
+
+        displayContent();
     }
 
     private void displayContent() {
@@ -119,18 +89,28 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new FirebaseRecyclerAdapter<Post, MyRecyclerViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull MyRecyclerViewHolder holder, int position, @NonNull Post model) {
+            protected void onBindViewHolder(@NonNull MyRecyclerViewHolder holder, final int position, @NonNull final Post model) {
                 holder.name.setText(model.getTitle());
                 code = model.getStatus();
+                holder.name.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        intent = new Intent(getApplicationContext(), DetailActivity.class);
+                        intent.putExtra("title", model.getTitle());
+                        intent.putExtra("status", model.getStatus().toString());
+                        intent.putExtra("message", model.getMessage());
+                        startActivity(intent);
+                    }
+                });
+
 
                 if (code == true) {
                     holder.imageView.setImageResource(android.R.drawable.presence_online);
                 } else {
                     holder.imageView.setImageResource(android.R.drawable.presence_busy);
                 }
-
-
             }
+
 
             @NonNull
             @Override
@@ -143,6 +123,27 @@ public class MainActivity extends AppCompatActivity {
         adapter.startListening();
         recyclerView.setAdapter(adapter);
 
+    }
+
+    private void checkToken(final String token){
+
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ref = database.getInstance().getReference("tokeny");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+             public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot dataSnapshot1: dataSnapshot.getChildren()) {
+                   String status = dataSnapshot.child(token).child("status").getValue().toString();
+                   Log.e("wartość", status);
+                }
+             }
+             @Override
+             public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+
+
+        });
     }
 
 }

@@ -19,7 +19,8 @@
                                   <option name="values">
                                     <map>
                                       <entry key="assetType" value="IMAGE" />
-                                      <entry key="imageAsset" value="C:\Users\Arkadiusz Wochniak\Downloads\p24.png" />
+                                      <entry key="imageAsset" value="C:\Users\Arkadiusz Wochniak\Downloads\stop.jpg" />
+                                      <entry key="outputName" value="stop" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -116,7 +117,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputIconType" value="NOTIFICATION" />
+                            <entry key="outputIconType" value="ACTIONBAR" />
                           </map>
                         </option>
                       </PersistentState>

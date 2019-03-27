@@ -1,16 +1,8 @@
 package com.example.arkadiuszwochniak.notifier;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,11 +11,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -38,19 +29,25 @@ import com.google.firebase.iid.InstanceIdResult;
 
 import org.w3c.dom.Text;
 
-import java.util.ArrayList;
+import java.lang.invoke.ConstantCallSite;
+
+import javax.security.auth.login.LoginException;
 
 public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
-    ImageView imageView;
+    ProgressBar progressBar;
+    ConstraintLayout errorFields;
+    ImageView imageView, imageView2;
+    TextView errorSite;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     FirebaseRecyclerOptions<Post> options;
     FirebaseRecyclerAdapter<Post, MyRecyclerViewHolder> adapter;
     Boolean code;
-    Boolean status;
+    String visibility;
     Intent intent;
     String deviceToken;
+    String test;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,26 +55,33 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         recyclerView = findViewById(R.id.recycler_view);
+        errorSite = findViewById(R.id.errorSite);
+        imageView2 = findViewById(R.id.imageView3);
+        errorFields = findViewById(R.id.errorFields);
+        progressBar = findViewById(R.id.progressBar);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference("kontrolki");
 
+
+
         String title = getIntent().getStringExtra("title");
         String body = getIntent().getStringExtra("body");
 
-
+        imageView2.setVisibility(View.GONE);
+        errorSite.setText("Trwa pobieranie danych...");
 
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
                 deviceToken = instanceIdResult.getToken();
-                Log.e("token urządzenia: ", deviceToken);
-                checkToken(deviceToken);
-
+                Log.e("token urządzenie", deviceToken);
+                getToken(deviceToken);
             }
         });
 
         displayContent();
+
     }
 
     private void displayContent() {
@@ -125,25 +129,56 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void checkToken(final String token){
+    public void getToken(final String token){
 
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference ref = database.getInstance().getReference("tokeny");
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+        final DatabaseReference ref = database.getInstance().getReference("testeny");
+        ref.addValueEventListener(new ValueEventListener() {
             @Override
              public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot dataSnapshot1: dataSnapshot.getChildren()) {
-                   String status = dataSnapshot.child(token).child("status").getValue().toString();
-                   Log.e("wartość", status);
+                    if (dataSnapshot.child(token) != null){
+                        try {
+                            String status = dataSnapshot.child(token).child("status").getValue().toString();
+                            String test = dataSnapshot.child(token).toString();
+                            Log.e("testowanie", test);
+                            checkToken(status);
+
+                        } catch (Exception e) {
+                            ref.child(deviceToken).child("status").setValue(false);
+                            ref.child(deviceToken).child("token").setValue(deviceToken);
+                        }
+                    }
                 }
-             }
+            }
+
+
              @Override
              public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-
+             }
 
         });
+
     }
 
+    public void checkToken(String status){
+        if(status=="true"){
+            Log.e("Komunikat checkToken", "Token został znaleziony w bazie i został przydzielony dostęp");
+            errorFields.setVisibility(View.GONE);
+            errorSite.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+
+        } else {
+            recyclerView.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+            errorFields.setVisibility(View.VISIBLE);
+            errorSite.setVisibility(View.VISIBLE);
+            imageView2.setVisibility(View.VISIBLE);
+            errorSite.setText("Token zostął znaleziony w bazie, natomiast Administrator nie przydzielił dostępu do zasobu...");
+            Log.e("Komunikat checkToken", "Token zostął znaleziony w bazie, natomiast na chwilę obecną nie został przydzielony dostęp przez Administratora");
+
+        }
+
+    }
 }

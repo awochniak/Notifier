@@ -1,6 +1,7 @@
 package com.example.arkadiuszwochniak.notifier;
 
 import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void displayContent() {
+    public void displayContent() {
 
         options =
                 new FirebaseRecyclerOptions.Builder<Post>()
@@ -132,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
     public void getToken(final String token){
 
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        final DatabaseReference ref = database.getInstance().getReference("testeny");
+        final DatabaseReference ref = database.getInstance().getReference("tokeny");
         ref.addValueEventListener(new ValueEventListener() {
             @Override
              public void onDataChange(DataSnapshot dataSnapshot) {
@@ -147,6 +148,8 @@ public class MainActivity extends AppCompatActivity {
                         } catch (Exception e) {
                             ref.child(deviceToken).child("status").setValue(false);
                             ref.child(deviceToken).child("token").setValue(deviceToken);
+                            ref.child(deviceToken).child("manufacturer").setValue(Build.MANUFACTURER);
+                            ref.child(deviceToken).child("model").setValue(Build.MODEL);
                         }
                     }
                 }
